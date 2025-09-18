@@ -1,0 +1,7 @@
+pandas
+matplotlib
+python-dotenv
+tqdm
+psycopg2-binary
+langchain-google-genai
+streamlit
