@@ -40,36 +40,34 @@ def plotGraphs(csv_file, visualizations_info):
             if vtype not in ALLOWED_VISUALIZATIONS:
                 print(f"⚠️ Unsupported visualization type: {vtype}")
                 continue
-            print(df.columns)
             if any(col not in df.columns for col in cols):
                 continue
 
             fig, ax = plt.subplots(figsize=(8, 4))
 
+            # Prepare x and y data
+            x = df[cols[0]] if cols else df.index
+            y = df[cols[1]] if len(cols) > 1 else df[cols[0]] if cols else df.index
+
+            # Plot based on type
             if vtype == "Line Chart":
-                x = df[cols[0]] if df[cols[0]].dtype.kind in 'iufc' else df.get("time", df.index)
-                y = df[cols[1]] if len(cols) > 1 else df[cols[0]]
-                ax.plot(x, y, label=cols[1] if len(cols) > 1 else cols[0])
-                ax.set_xlabel(cols[0] if len(cols) > 1 else "Time")
-                ax.set_ylabel(cols[1] if len(cols) > 1 else cols[0])
+                ax.plot(x, y, label=y.name)
+                ax.set_xlabel(x.name if len(cols) > 1 else "Time")
+                ax.set_ylabel(y.name)
                 ax.set_title(f"{y.name} vs {x.name}")
                 ax.legend()
-                if x.name == "time":
-                    style_time_axis(ax)
 
             elif vtype == "Bar Chart":
-                ax.bar(df[cols[0]], df[cols[1]] if len(cols) > 1 else df[cols[0]], color='skyblue')
-                ax.set_xlabel(cols[0])
-                ax.set_ylabel(cols[1] if len(cols) > 1 else cols[0])
+                ax.bar(x, y, color='skyblue')
+                ax.set_xlabel(x.name)
+                ax.set_ylabel(y.name)
                 ax.set_title(f"Bar Chart: {', '.join(cols)}")
 
             elif vtype == "Scatter Plot":
-                x = df[cols[0]]
-                y = df[cols[1]] if len(cols) > 1 else df[cols[0]]
                 ax.scatter(x, y, alpha=0.7)
-                ax.set_xlabel(cols[0])
-                ax.set_ylabel(cols[1] if len(cols) > 1 else cols[0])
-                ax.set_title(f"Scatter Plot: {cols[1]} vs {cols[0]}" if len(cols) > 1 else f"{cols[0]} Scatter")
+                ax.set_xlabel(x.name)
+                ax.set_ylabel(y.name)
+                ax.set_title(f"Scatter Plot: {y.name} vs {x.name}")
 
             elif vtype == "Histogram":
                 for col in cols:
@@ -88,14 +86,17 @@ def plotGraphs(csv_file, visualizations_info):
                 ax.set_title(f"Area Chart: {', '.join(cols)}")
 
             elif vtype == "Pie Chart":
-                if len(cols) != 1:
-                    continue
-                ax.pie(df[cols[0]].value_counts(), labels=df[cols[0]].value_counts().index, autopct='%1.1f%%')
-                ax.set_title(f"Pie Chart: {cols[0]}")
+                if len(cols) == 1:
+                    ax.pie(df[cols[0]].value_counts(), labels=df[cols[0]].value_counts().index, autopct='%1.1f%%')
+                    ax.set_title(f"Pie Chart: {cols[0]}")
 
             elif vtype == "Heatmap":
                 sns.heatmap(df[cols].corr(), annot=True, fmt=".2f", cmap="coolwarm", ax=ax)
                 ax.set_title(f"Heatmap: {', '.join(cols)}")
+
+            # Apply time styling if x-axis is datetime
+            if pd.api.types.is_datetime64_any_dtype(x):
+                style_time_axis(ax)
 
             figures.append(fig)
 
@@ -107,3 +108,4 @@ def plotGraphs(csv_file, visualizations_info):
     except Exception as e:
         print(f"⚠️ Error while plotting: {e}")
         return []
+

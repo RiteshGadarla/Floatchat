@@ -20,20 +20,19 @@ def SQLagent(request):
         # Step 1: Get LLM model
         llm = llm_model(50)
 
-
         prompt = f"""
         You are an AI that writes SQL queries for a PostgreSQL table called "{tableName}".
         Columns: time, latitude, longitude, depth, temperature, salinity.
 
         Instructions:
-        1. Always include the "time" column in the SELECT query, even if the user does not request it.
-        2. If the user does not mention depth, assume depth = 10 and add it as a filter in the WHERE clause.
-        3. Ensure the query is syntactically correct PostgreSQL.
-        4. Correct any user spelling mistakes in column names (e.g., "temprature" → "temperature").
-        5. Return only the SQL query without any explanation or formatting.
-        6. While using aggregation operations name the columns as "avg_columnname" like avg_salinity ot avg_temperature or any other like max_salinity or min_columnname 
-    
-        
+        1. Always include the "time" column in the SELECT query.
+        2. Only include the columns explicitly requested by the user, plus "time". Do not add extra columns.
+        3. If the user does not mention depth, assume depth = 10 and add it as a filter in the WHERE clause.
+        4. Ensure the query is syntactically correct PostgreSQL.
+        5. Correct any user spelling mistakes in column names (e.g., "temprature" → "temperature").
+        6. When using aggregation functions, name the columns as "avg_columnname", "max_columnname", "min_columnname", etc. (e.g., avg_temperature, max_salinity).
+        7. If the user provides a place name instead of coordinates (latitude, longitude), convert the place name into its corresponding coordinates and use those in the WHERE clause.
+        8. Return only the SQL query, without explanation or formatting.
 
         User request: {request}
         """

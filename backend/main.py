@@ -51,7 +51,23 @@ if user_input := st.chat_input("🔍 Enter your query..."):
             if os.path.exists(csv_path):
                 df = pd.read_csv(csv_path)
                 st.subheader("📊 Extracted Data Preview")
-                st.dataframe(df.head(20))
+
+                n = len(df)
+                if n > 10:
+                    top = df.head(5)
+                    bottom = df.tail(5)
+                    # Create a separator row with "..."
+                    sep = pd.DataFrame([["..." for _ in df.columns]], columns=df.columns)
+                    combined_df = pd.concat([top, sep, bottom], ignore_index=True)
+                elif n > 5:
+                    top = df.head(5)
+                    bottom = df.tail(n - 5)
+                    sep = pd.DataFrame([["..." for _ in df.columns]], columns=df.columns)
+                    combined_df = pd.concat([top, sep, bottom], ignore_index=True)
+                else:
+                    combined_df = df
+
+                st.dataframe(combined_df, use_container_width=True)
 
                 with open(csv_path, "rb") as f:
                     st.download_button(
@@ -63,7 +79,7 @@ if user_input := st.chat_input("🔍 Enter your query..."):
 
                 # Summarize data
                 with st.spinner("📝 Summarizing extracted data..."):
-                    summary, visualizations = summarizeTable(csv_path)
+                    summary, visualizations = summarizeTable(user_input, csv_path)
 
                 if summary:
                     st.subheader("📌 Summary")

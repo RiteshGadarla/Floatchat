@@ -37,12 +37,37 @@ def extract_llm_text(response):
     return ""
 
 # === Chunk summarization ===
-def summarize_chunk(chunk, llm):
+def summarize_chunk(chunk, llm, userPrompt=None):
     try:
-        chunk_text = json.dumps(chunk)
-        prompt = f"Summarize this data chunk:\n{chunk_text}"
+        chunk_text = json.dumps(chunk, indent=2)
+
+        prompt = f"""
+        You are an AI assistant helping to summarize part of a dataset. 
+        Your summary will be used by another AI agent for deeper analysis.
+
+        User request: {userPrompt if userPrompt else "General summary"}
+
+        Here is one chunk of the dataset:
+        {chunk_text}
+
+        Task:
+        1. Identify and explain the **main patterns, trends, or anomalies** in this chunk.  
+        2. Provide important **numerical ranges, averages, or extreme values** if they are relevant.  
+        3. Keep the explanation in **clear, beginner-friendly language** so it is easy to understand.  
+        4. Format the output in a **consistent, structured style**:
+
+        Summary:
+        - Key trends:
+        - Notable anomalies/outliers:
+        - Important numeric insights:
+        - Other observations:
+
+        Do not provide a final conclusion. Keep it short, factual, and clear.
+        """
+
         response = llm.invoke(prompt)
         return extract_llm_text(response)
+
     except Exception as e:
         print(f"⚠️ Chunk summarization error: {e}")
         return ""
@@ -90,7 +115,7 @@ Textual Summary:
     return visualizations_info
 
 # === Main summary + visualization generator ===
-def summarizeTable(csv_file=None):
+def summarizeTable(userPrompt, csv_file=None):
     try:
         if csv_file is None:
             project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -128,20 +153,41 @@ def summarizeTable(csv_file=None):
         llm = llm_model(50)
         all_summaries = []
         with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
-            futures = {executor.submit(summarize_chunk, chunk, llm): idx for idx, chunk in enumerate(chunks)}
+            futures = {
+                executor.submit(summarize_chunk, chunk, llm, userPrompt): idx
+                for idx, chunk in enumerate(chunks)
+            }
             for future in tqdm(as_completed(futures), total=len(futures), desc="Summarizing Chunks"):
                 summary = future.result()
                 all_summaries.append(summary)
 
-        # Final summary
-        combined_prompt = "Based on the following chunk summaries, generate a concise textual summary of the data:\n" + "\n---\n".join(all_summaries)
+        # Create final combined prompt with user input
+        combined_prompt = f"""
+        You are an AI assistant helping a beginner understand data from a CSV file.
+
+        User request: {userPrompt}
+
+        Here are simplified summaries of different chunks of the dataset:
+        {"\n---\n".join(all_summaries)}
+
+        Task:
+        1. Read the user’s request and the chunk summaries.
+        2. Create a **single, clear, and beginner-friendly explanation** of the data.
+        3. Use **simple words and short sentences** (avoid technical jargon).
+        4. Point out important **trends, patterns, or unusual values**.
+        5. If numbers are important, give **context in plain English** 
+           (e.g., instead of "mean temperature = 20", say "on average, the temperature stays around 20°C").
+        6. Do not repeat information; merge related insights into a smooth explanation.
+        7. Write it like you are **teaching a student who is new to data analysis**.
+        """
+
         final_response = llm_model(55).invoke(combined_prompt)
         final_summary = extract_llm_text(final_response)
 
         # Get visualizations
         visualizations_info = get_visualizations_from_summary(final_summary)
 
-        print("visualizations_info: ",visualizations_info)
+        print("visualizations_info: ", visualizations_info)
         print("🎉 Final summary and visualizations generated successfully.")
         return final_summary, visualizations_info
 
