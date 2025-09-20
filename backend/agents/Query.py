@@ -31,6 +31,9 @@ def SQLagent(request):
         3. Ensure the query is syntactically correct PostgreSQL.
         4. Correct any user spelling mistakes in column names (e.g., "temprature" → "temperature").
         5. Return only the SQL query without any explanation or formatting.
+        6. While using aggregation operations name the columns as "avg_columnname" like avg_salinity ot avg_temperature or any other like max_salinity or min_columnname 
+    
+        
 
         User request: {request}
         """
