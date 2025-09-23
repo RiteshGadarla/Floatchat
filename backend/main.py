@@ -1,7 +1,9 @@
 import streamlit as st
+from streamlit_folium import st_folium
 from agents.Query import SQLagent
 from agents.SummaringAgent import summarizeTable
 from agents.Plotting import plotGraphs
+from agents.MapAgent import generateMap
 import os
 import pandas as pd
 
@@ -39,6 +41,8 @@ if user_input := st.chat_input("🔍 Enter your query..."):
 
         if sql_query and sql_query.get("result"):
             st.success("✅ Query executed successfully!")
+            sql_string = sql_query["sql_query"]
+            map_html = generateMap(sql_string)
 
             sql_query = sql_query.get("sql_query", "")
             st.subheader("📝 Generated SQL Query")
@@ -93,6 +97,10 @@ if user_input := st.chat_input("🔍 Enter your query..."):
                         st.pyplot(fig)
                 else:
                     st.warning("No valid plots generated.")
+
+
+                st.subheader("Map Preview")
+                st.components.v1.html(map_html, height=500, scrolling=True)
 
                 # Save assistant response in history
                 st.session_state.messages.append({

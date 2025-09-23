@@ -5,4 +5,5 @@ tqdm
 psycopg2-binary
 langchain-google-genai
 streamlit
+streamlit_folium
 seaborn
