@@ -1,0 +1,7 @@
+numpy
+pandas
+scipy
+netcdf4
+xarray
+tqdm
+psycopg2-binary
