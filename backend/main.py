@@ -1,5 +1,4 @@
 import streamlit as st
-from streamlit_folium import st_folium
 from agents.Query import SQLagent
 from agents.SummaringAgent import summarizeTable
 from agents.Plotting import plotGraphs
@@ -25,8 +24,12 @@ for msg in st.session_state.messages:
             st.subheader("📌 Summary")
             st.write(msg["summary"])
         if msg.get("figures"):
+            st.subheader("📊 Visualization")
             for fig in msg["figures"]:
                 st.pyplot(fig)
+        if msg.get("map_html"):
+            st.subheader("🗺️ Map Preview")
+            st.components.v1.html(msg["map_html"], height=500, scrolling=True)
 
 # === User Input ===
 if user_input := st.chat_input("🔍 Enter your query..."):
@@ -72,6 +75,7 @@ if user_input := st.chat_input("🔍 Enter your query..."):
                     combined_df = df
 
                 st.dataframe(combined_df, use_container_width=True)
+                st.markdown(f"**Total Entries:** {n}")
 
                 with open(csv_path, "rb") as f:
                     st.download_button(
@@ -99,7 +103,7 @@ if user_input := st.chat_input("🔍 Enter your query..."):
                     st.warning("No valid plots generated.")
 
 
-                st.subheader("Map Preview")
+                st.subheader("🗺️ Map Preview")
                 st.components.v1.html(map_html, height=500, scrolling=True)
 
                 # Save assistant response in history
@@ -107,7 +111,8 @@ if user_input := st.chat_input("🔍 Enter your query..."):
                     "role": "assistant",
                     "content": "Here are your query results:",
                     "summary": summary,
-                    "figures": figures
+                    "figures": figures,
+                    "map_html": map_html
                 })
             else:
                 st.error("CSV file not found after SQL execution.")

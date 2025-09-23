@@ -5,8 +5,8 @@ import matplotlib.dates as mdates
 import seaborn as sns
 
 ALLOWED_VISUALIZATIONS = [
-    "Bar Chart", "Line Chart", "Histogram", "Scatter Plot",
-    "Pie Chart", "Box Plot", "Area Chart", "Heatmap"
+    "Line Chart", "Histogram", "Scatter Plot",
+    "Box Plot", "Area Chart", "Heatmap"
 ]
 
 def style_time_axis(ax):

@@ -1,5 +1,4 @@
 import re
-import os
 from typing import Optional, Tuple, List
 import pandas as pd
 import folium
@@ -72,12 +71,6 @@ def _clean_leftover_where(where_clause: str) -> List[str]:
             cleaned.append(p)
     return cleaned
 
-
-import folium
-from folium.plugins import MarkerCluster
-import pandas as pd
-from database.postgres import run_query
-# assume your parsing functions (_parse_latlon_ranges, etc.) are the same
 
 def generateMap(
         original_sql: str,

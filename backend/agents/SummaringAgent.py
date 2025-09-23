@@ -14,6 +14,7 @@ ALLOWED_VISUALIZATIONS = [
     "Pie Chart", "Box Plot", "Area Chart", "Heatmap"
 ]
 
+
 # === Robust JSON extractor ===
 def safe_json_load(text):
     """Extract JSON from LLM response robustly."""
@@ -26,6 +27,7 @@ def safe_json_load(text):
         print("⚠️ JSON parsing failed:", e)
     return []
 
+
 # === Helper to safely extract LLM text ===
 def extract_llm_text(response):
     """Safely extract text from LLM response."""
@@ -35,6 +37,7 @@ def extract_llm_text(response):
     elif isinstance(response.content, str):
         return response.content
     return ""
+
 
 # === Chunk summarization ===
 def summarize_chunk(chunk, llm, userPrompt=None):
@@ -72,31 +75,46 @@ def summarize_chunk(chunk, llm, userPrompt=None):
         print(f"⚠️ Chunk summarization error: {e}")
         return ""
 
+
 # === Visualization suggestions based on summary ===
-def get_visualizations_from_summary(summary_text):
+def get_visualizations_from_summary(summary_text, user_request):
     print(summary_text)
     llm = llm_model(55)
+
     viz_prompt = f"""
-You are a data visualization assistant. The dataset contains the following attributes:
-- if you get any get aggreagate columns, take it as avg_columnname like avg_salinity or max_temperature or any other column name  then just take the column name as it is
-- time
-- latitude
-- longitude
-- depth
-- temperature
-- salinity
+    You are a data visualization assistant. The dataset contains the following attributes:
+    - time
+    - latitude
+    - longitude
+    - depth
+    - temperature
+    - salinity
+    - Any aggregated columns like avg_salinity or max_temperature should be treated as their base column name (e.g., salinity, temperature).
 
-Based on the following textual summary of the data, suggest visualizations to help a user understand the data clearly. 
-Only use these visualization types: {ALLOWED_VISUALIZATIONS}. 
-For each suggested visualization, return **only valid JSON**, with the following fields:
-- type: visualization type (from allowed list)
-- columns: list of columns to use (choose from the attributes above)
-Even if the dataset is small or uniform, suggest at least 1-2 visualizations using columns from the summary.
-Do **not** add any text outside the JSON.
+    Based on the following textual summary of the data, suggest visualizations to help a user understand the data clearly. 
 
-Textual Summary:
-{summary_text}
-"""
+    Rules:
+    1. Only use these visualization types: {ALLOWED_VISUALIZATIONS}.
+    2. Avoid illogical visualizations. For example:
+       - Do not plot latitude vs longitude as a scatter unless it's explicitly for mapping.
+       - Do not plot unrelated numeric comparisons without context.
+    3. Prioritize Line Charts when the x-axis can be time.
+    4. Each visualization should use columns that make logical sense:
+       - Use time on the x-axis for trends over time.
+       - Use numeric columns (temperature, salinity, depth) for y-axis values.
+    5. Return **only valid JSON**, with each object containing:
+       - type: visualization type (from allowed list)
+       - columns: list of columns to use (choose from the attributes above)
+
+    Even if the dataset is small or uniform, suggest at least 1–2 visualizations using columns from the summary.
+        
+    User request:
+    {user_request}
+    
+    Textual Summary:
+    {summary_text}
+    """
+
     try:
         response = llm.invoke(viz_prompt)
         text = extract_llm_text(response)
@@ -109,10 +127,13 @@ Textual Summary:
     # Fallback
     if not visualizations_info:
         visualizations_info = [
-            {"type": "Bar Chart", "columns": ["time", "temperature"], "purpose": "Show distribution of temperature over time"},
-            {"type": "Scatter Plot", "columns": ["latitude", "salinity"], "purpose": "Visualize relationship between latitude and salinity"}
+            {"type": "Bar Chart", "columns": ["time", "temperature"],
+             "purpose": "Show distribution of temperature over time"},
+            {"type": "Scatter Plot", "columns": ["latitude", "salinity"],
+             "purpose": "Visualize relationship between latitude and salinity"}
         ]
     return visualizations_info
+
 
 # === Main summary + visualization generator ===
 def summarizeTable(userPrompt, csv_file=None):
@@ -185,7 +206,7 @@ def summarizeTable(userPrompt, csv_file=None):
         final_summary = extract_llm_text(final_response)
 
         # Get visualizations
-        visualizations_info = get_visualizations_from_summary(final_summary)
+        visualizations_info = get_visualizations_from_summary(final_summary, userPrompt)
 
         print("visualizations_info: ", visualizations_info)
         print("🎉 Final summary and visualizations generated successfully.")
@@ -194,6 +215,7 @@ def summarizeTable(userPrompt, csv_file=None):
     except Exception as e:
         print("Summary generation error:", e)
         return "Error generating summary.", []
+
 
 # === Main entry point ===
 if __name__ == "__main__":
