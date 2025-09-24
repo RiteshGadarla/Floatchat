@@ -71,27 +71,27 @@ export function ExpeditionSection() {
         <div className="grid md:grid-cols-3 gap-6">
           {[
             {
-              title: "Salinity & Temperature Profiles",
-              description: "Discover the mysteries of the deep ocean with our advanced submersibles",
-              image: "deep sea exploration with submersible and bioluminescent creatures",
-            },
-            {
               title: "BGC Parameter Analysis",
               description: "Compare critical BGC parameters like chlorophyll, dissolved oxygen, and nitrate across different regions and timeframes.",
-              image: "colorful coral reef with tropical fish and marine life",
+              image: "bgc",
+            },
+            {
+              title: "Salinity & Temperature Profiles",
+              description: "Discover the mysteries of the deep ocean with our advanced submersibles",
+              image: "temp_sal",
             },
             {
               title: "ARGO Float Trajectories",
               description: "Visualize the mapped trajectories of individual ARGO floats, exploring their paths and historical data.",
-              image: "diverse marine life including whales, dolphins and exotic fish",
+              image: "argo_traj",
             },
           ].map((card, index) => (
             <div key={index} className="group cursor-pointer">
               <div className="relative rounded-xl overflow-hidden mb-4">
                 <img
-                  src={`/abstract-geometric-shapes.png?height=200&width=300&query=${card.image}`}
+                  src={`/${card.image}.png?height=300&width=500&query=${card.image}`}
                   alt={card.title}
-                  className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
+                  className="w-full h-68 object-cover transition-transform duration-500 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
               </div>
