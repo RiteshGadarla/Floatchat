@@ -13,6 +13,8 @@ export default function HomePage() {
       <Navigation />
       <HeroSection />
       <JoinOdysseySection />
+      {/* <div className="h-40 w-full bg-gradient-to-b from-blue-500 via-purple-500 to-pink-500"></div> */}
+
       <StatsSection />
       <ExpeditionSection />
       <ExplorerSection />

@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+
 // We've removed external imports for Button and Play.
 // They are now defined within this single file to prevent errors.
 
@@ -134,9 +135,11 @@ export function WhyItMattersSection() {
             Join researchers, data scientists, and policymakers using our AI-powered chatbot to make faster, more informed decisions about our oceans.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="http://localhost:8501">
             <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white px-8 py-3 rounded-full text-lg font-semibold transition-all duration-300 hover:scale-105">
               START CHATTING
             </Button>
+            </a>
             <Button
               variant="outline"
               className="border-white/30 text-white hover:bg-white/10 px-8 py-3 rounded-full text-lg font-semibold transition-all duration-300 bg-transparent"
