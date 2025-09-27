@@ -3,6 +3,9 @@
 import { useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
+import img1 from "../public/img1.png";
+import img2 from "../src/assets/img2.png";
+import img3 from "../src/assets/img3.png";
 
 export function ExpeditionSection() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -73,17 +76,29 @@ export function ExpeditionSection() {
             {
               title: "BGC Parameter Analysis",
               description: "Compare critical BGC parameters like chlorophyll, dissolved oxygen, and nitrate across different regions and timeframes.",
+<<<<<<< HEAD
               image: "bgc",
+=======
+              image: "img1",
+>>>>>>> a909aa1 (minor changes)
             },
             {
               title: "Salinity & Temperature Profiles",
               description: "Discover the mysteries of the deep ocean with our advanced submersibles",
+<<<<<<< HEAD
               image: "temp_sal",
+=======
+              image: "img2",
+>>>>>>> a909aa1 (minor changes)
             },
             {
               title: "ARGO Float Trajectories",
               description: "Visualize the mapped trajectories of individual ARGO floats, exploring their paths and historical data.",
+<<<<<<< HEAD
               image: "argo_traj",
+=======
+              image: "img3",
+>>>>>>> a909aa1 (minor changes)
             },
           ].map((card, index) => (
             <div key={index} className="group cursor-pointer">

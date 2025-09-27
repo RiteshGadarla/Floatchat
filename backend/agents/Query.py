@@ -18,7 +18,7 @@ def SQLagent(request):
     """
     try:
         # Step 1: Get LLM model
-        llm = llm_model(50)
+        llm = llm_model(50, 0.2)
 
         prompt = f"""
         You are an AI that writes SQL queries for a PostgreSQL table called "{tableName}".
