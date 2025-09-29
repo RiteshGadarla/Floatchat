@@ -29,7 +29,7 @@ except FileNotFoundError:
                            "voice_button_info": "Voice input not implemented yet."}}
 
 # Page config
-st.set_page_config(layout="wide", page_title="FloatChat", page_icon="🌊")
+st.set_page_config(page_title="FloatChat", page_icon="🌊")
 
 # Custom CSS for Ocean Theme with Fixed Layout
 st.markdown("""
@@ -137,18 +137,17 @@ st.markdown("""
 
     /* Main content container - proper spacing for fixed input */
     .main .block-container {
-        padding-top: 2rem;
         padding-bottom: 120px !important;
         max-width: 100%;
     }
 
     /* Chat messages container - scrollable area */
     .chat-messages-container {
-        min-height: 200px;
+        min-height:0px;
         max-height: calc(100vh - 320px);
         overflow-y: auto;
         overflow-x: hidden;
-        padding-right: 10px;
+        padding-right: 60px;
         margin-bottom: 20px;
     }
 
@@ -175,7 +174,7 @@ st.markdown("""
     .stChatMessage {
         background-color: rgba(255, 255, 255, 0.95) !important;
         border-radius: 15px;
-        padding: 15px 20px;
+        padding: 18px 25px 18px 25px;        
         margin-bottom: 12px;
         color: #333333;
         border: 1px solid rgba(0, 116, 217, 0.2);
@@ -211,7 +210,11 @@ st.markdown("""
         backdrop-filter: blur(15px);
         box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.5);
     }
-
+    /* Center the logo image in the sidebar */
+    .stImage {
+        display: flex;
+        justify-content: center;
+    }
     /* Adjust for sidebar when expanded */
     [data-testid="stSidebar"][aria-expanded="true"] ~ .main .custom-input-container {
         margin-left: 21rem;
@@ -271,14 +274,16 @@ st.markdown("""
     .stChatInput input::placeholder {
         color: rgba(51, 51, 51, 0.5) !important;
     }
-
+.mic-button-wrapper{
+    width: 75px !important;
+}
     /* Mic button styling */
     .mic-button-wrapper button {
         background: linear-gradient(135deg, #FF6B6B, #FF8E53) !important;
         color: white !important;
         border-radius: 50% !important;
         border: none !important;
-        width: 55px !important;
+        width: 75px !important;
         height: 55px !important;
         min-width: 55px !important;
         min-height: 55px !important;
@@ -370,7 +375,7 @@ st.markdown("""
         height: 100px;
         background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg"><path d="M0 60 Q 150 0 300 60 Q 450 120 600 60 Q 750 0 900 60 Q 1050 120 1200 60 L 1200 120 L 0 120 Z" fill="%23001f3f" fill-opacity="0.3"/></svg>') repeat-x;
         animation: wave 30s linear infinite;
-        z-index: 0;
+        z-index: 10000;
         pointer-events: none;
     }
 
@@ -391,13 +396,14 @@ st.markdown("""
 
 # Dynamic image paths
 project_root = os.path.dirname(os.path.abspath(__file__))
-logo_path = os.path.join(project_root, "logo.png")
+logo_path = os.path.join(project_root, "image2.png")
 mic_path = os.path.join(project_root, "mic.png")
-
+argo_path = os.path.join(project_root, "argo2.png")
+ocean_path = os.path.join(project_root, "ocean.png")
 # Sidebar with improved UI
 with st.sidebar:
     if os.path.exists(logo_path):
-        st.image(logo_path, use_container_width=True)
+        st.image(logo_path, width=200)
     else:
         st.warning("Logo image not found")
 
@@ -409,16 +415,16 @@ with st.sidebar:
     st.markdown("""
     <div>
         <div class="badge">
-            <img src="https://img.icons8.com/fluency/48/ship.png" alt="ship"/>
-            <span>3,450 Argo Floats</span>
+            <img src="file://{argo_path}" alt="ship"/>
+            <span>4,000 Argo Floats</span>
         </div>
         <div class="badge">
             <img src="https://img.icons8.com/fluency/48/calendar.png" alt="calendar"/>
             <span>2002-2025 Data</span>
         </div>
         <div class="badge">
-            <img src="https://img.icons8.com/fluency/48/globe.png" alt="globe"/>
-            <span>7 Oceans Covered</span>
+            <img src="file://{ocean_path}" alt="globe"/>
+            <span>5 Oceans Covered</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -432,13 +438,38 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 # Chat Messages Container with proper scrolling
-st.markdown('<div class="chat-messages-container">', unsafe_allow_html=True)
-
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
-
-st.markdown('</div>', unsafe_allow_html=True)
+chat_container = st.container()
+with chat_container:
+    st.markdown('<div class="chat-messages-container">', unsafe_allow_html=True)
+    for msg in st.session_state.messages:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+            # Display additional content like maps, dataframes, etc., if present
+            if msg["role"] == "assistant" and "map_html" in msg:
+                st.subheader(trans["sql_header"])
+                st.code(msg.get("sql_query", ""), language="sql")
+                st.subheader(trans["map_header"])
+                st.components.v1.html(msg["map_html"], height=500, scrolling=True)
+                if "df" in msg:
+                    st.subheader(trans["data_header"])
+                    st.dataframe(msg["df"], use_container_width=True)
+                    st.markdown(trans["total_entries"].format(n=msg["n"]))
+                    st.download_button(
+                        label=trans["download"],
+                        data=msg["csv_data"],
+                        file_name="dataExtracted.csv",
+                        mime="text/csv"
+                    )
+                if "summary" in msg and msg["summary"]:
+                    st.subheader(trans["summary_header"])
+                    st.write(msg["summary"])
+                if "figures" in msg and msg["figures"]:
+                    st.subheader(trans["vis_header"])
+                    for fig in msg["figures"]:
+                        st.pyplot(fig)
+                elif "figures" in msg:
+                    st.warning(trans["no_plots"])
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # Custom Fixed Input Container at Bottom - Single Div
 st.markdown('<div class="custom-input-container"><div class="input-row-flex">', unsafe_allow_html=True)
@@ -460,92 +491,75 @@ st.markdown('</div></div>', unsafe_allow_html=True)
 
 # Handle mic button click
 if mic_clicked:
-    st.info(trans["voice_button_info"])
+    st.session_state.messages.append({"role": "assistant", "content": trans["voice_button_info"]})
+    st.rerun()
 
 # Process User Input
 if user_input:
+    with chat_container:
+        with st.chat_message("user"):
+            st.markdown(user_input)
     st.session_state.messages.append({"role": "user", "content": user_input})
 
-    with st.chat_message("assistant"):
-        with st.spinner(trans["extracting"]):
-            sql_query = SQLagent(user_input)
+    with chat_container:
+        with st.chat_message("assistant"):
+            with st.spinner(trans["extracting"]):
+                sql_query = SQLagent(user_input)
 
-            if sql_query and sql_query.get("result"):
-                st.success(trans["success"])
-                sql_string = sql_query["sql_query"]
+                if sql_query and sql_query.get("result"):
+                    st.success(trans["success"])
+                    sql_string = sql_query["sql_query"]
 
-                map_html = generateMap(sql_string)
+                    map_html = generateMap(sql_string)
 
-                st.subheader(trans["sql_header"])
-                st.code(sql_string, language="sql")
+                    csv_path = os.path.join(project_root, "dataExtracted.csv")
 
-                st.subheader(trans["map_header"])
-                st.components.v1.html(map_html, height=500, scrolling=True)
-
-                csv_path = os.path.join(project_root, "dataExtracted.csv")
-
-                if os.path.exists(csv_path):
-                    df = pd.read_csv(csv_path)
-                    st.subheader(trans["data_header"])
-
-                    n = len(df)
-                    if n > 10:
-                        top = df.head(5)
-                        bottom = df.tail(5)
-                        sep = pd.DataFrame([["..." for _ in df.columns]], columns=df.columns)
-                        combined_df = pd.concat([top, sep, bottom], ignore_index=True)
-                    elif n > 5:
-                        top = df.head(5)
-                        bottom = df.tail(n - 5)
-                        sep = pd.DataFrame([["..." for _ in df.columns]], columns=df.columns)
-                        combined_df = pd.concat([top, sep, bottom], ignore_index=True)
-                    else:
-                        combined_df = df
-
-                    st.dataframe(combined_df, use_container_width=True)
-                    st.markdown(trans["total_entries"].format(n=n))
-
-                    with open(csv_path, "rb") as f:
-                        st.download_button(
-                            label=trans["download"],
-                            data=f,
-                            file_name="dataExtracted.csv",
-                            mime="text/csv"
-                        )
-
-                    with st.spinner(trans["summarizing"]):
-                        summary, visualizations = summarizeTable(user_input, csv_path)
-
-                        if summary:
-                            st.subheader(trans["summary_header"])
-                            st.write(summary)
-
-                        figures = plotGraphs(csv_path, visualizations)
-                        if figures:
-                            st.subheader(trans["vis_header"])
-                            for fig in figures:
-                                st.pyplot(fig)
+                    if os.path.exists(csv_path):
+                        df = pd.read_csv(csv_path)
+                        n = len(df)
+                        if n > 10:
+                            top = df.head(5)
+                            bottom = df.tail(5)
+                            sep = pd.DataFrame([["..." for _ in df.columns]], columns=df.columns)
+                            combined_df = pd.concat([top, sep, bottom], ignore_index=True)
+                        elif n > 5:
+                            top = df.head(5)
+                            bottom = df.tail(n - 5)
+                            sep = pd.DataFrame([["..." for _ in df.columns]], columns=df.columns)
+                            combined_df = pd.concat([top, sep, bottom], ignore_index=True)
                         else:
-                            st.warning(trans["no_plots"])
+                            combined_df = df
 
-                    st.session_state.messages.append({
-                        "role": "assistant",
-                        "content": trans.get("assistant_content", "Data processed successfully"),
-                        "summary": summary,
-                        "figures": figures,
-                        "map_html": map_html
-                    })
+                        with open(csv_path, "rb") as f:
+                            csv_data = f.read()
+
+                        with st.spinner(trans["summarizing"]):
+                            summary, visualizations = summarizeTable(user_input, csv_path)
+                            figures = plotGraphs(csv_path, visualizations)
+
+                        # Append assistant message with all content
+                        st.session_state.messages.append({
+                            "role": "assistant",
+                            "content": trans.get("assistant_content", "Data processed successfully"),
+                            "sql_query": sql_string,
+                            "map_html": map_html,
+                            "df": combined_df,
+                            "n": n,
+                            "csv_data": csv_data,
+                            "summary": summary,
+                            "figures": figures
+                        })
+                    else:
+                        st.error(trans["csv_not_found"])
+                        st.session_state.messages.append({
+                            "role": "assistant",
+                            "content": trans["csv_not_found"]
+                        })
                 else:
-                    st.error(trans["csv_not_found"])
+                    st.error(trans["query_failed"])
                     st.session_state.messages.append({
                         "role": "assistant",
-                        "content": trans["csv_not_found"]
+                        "content": trans["query_failed"]
                     })
-            else:
-                st.error(trans["query_failed"])
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": trans["query_failed"]
-                })
 
     st.rerun()
