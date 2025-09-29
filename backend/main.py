@@ -7,6 +7,7 @@ import os
 import pandas as pd
 import json
 import uuid
+import base64
 
 # Load languages from JSON
 try:
@@ -400,6 +401,22 @@ logo_path = os.path.join(project_root, "image2.png")
 mic_path = os.path.join(project_root, "mic.png")
 argo_path = os.path.join(project_root, "argo2.png")
 ocean_path = os.path.join(project_root, "ocean.png")
+
+# Load base64 for local images
+argo_base64 = ""
+ocean_base64 = ""
+try:
+    with open(argo_path, "rb") as f:
+        argo_base64 = base64.b64encode(f.read()).decode()
+except FileNotFoundError:
+    st.sidebar.warning("argo2.png not found")
+
+try:
+    with open(ocean_path, "rb") as f:
+        ocean_base64 = base64.b64encode(f.read()).decode()
+except FileNotFoundError:
+    st.sidebar.warning("ocean.png not found")
+
 # Sidebar with improved UI
 with st.sidebar:
     if os.path.exists(logo_path):
@@ -412,19 +429,19 @@ with st.sidebar:
     trans = translations.get(lang_code, translations["en"])
 
     st.markdown('<div class="badge-title">📊 Statistics</div>', unsafe_allow_html=True)
-    st.markdown("""
+    st.markdown(f"""
     <div>
         <div class="badge">
-            <img src="file://{argo_path}" alt="ship"/>
+            <img src="data:image/png;base64,{argo_base64}" alt="ship"/>
             <span>4,000 Argo Floats</span>
         </div>
         <div class="badge">
             <img src="https://img.icons8.com/fluency/48/calendar.png" alt="calendar"/>
-            <span>2002-2025 Data</span>
+            <span>2002-Present Data Archive</span>
         </div>
         <div class="badge">
-            <img src="file://{ocean_path}" alt="globe"/>
-            <span>5 Oceans Covered</span>
+            <img src="data:image/png;base64,{ocean_base64}" alt="globe"/>
+            <span>All Oceans Covered</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
