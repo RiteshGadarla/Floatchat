@@ -79,7 +79,7 @@ def summarize_chunk(chunk, llm, userPrompt=None):
 # === Visualization suggestions based on summary ===
 def get_visualizations_from_summary(summary_text, user_request):
     print(summary_text)
-    llm = llm_model(55)
+    llm = llm_model(55,0.2)
 
     viz_prompt = f"""
     You are a data visualization assistant. The dataset contains the following attributes:
