@@ -10,8 +10,10 @@ import uuid
 import base64
 
 # Load languages from JSON
+project_root = os.path.dirname(os.path.abspath(__file__))
 try:
-    with open("languages.json", "r") as f:
+    language_path = os.path.join(project_root, "languages.json")
+    with open(language_path, "r") as f:
         languages_data = json.load(f)
         languages = languages_data["languages"]
         translations = languages_data["translations"]
@@ -396,7 +398,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Dynamic image paths
-project_root = os.path.dirname(os.path.abspath(__file__))
 logo_path = os.path.join(project_root, "image2.png")
 mic_path = os.path.join(project_root, "mic.png")
 argo_path = os.path.join(project_root, "argo2.png")
@@ -437,7 +438,7 @@ with st.sidebar:
         </div>
         <div class="badge">
             <img src="https://img.icons8.com/fluency/48/calendar.png" alt="calendar"/>
-            <span>2002-Present Data Archive</span>
+            <span>2002-2025 Data Archive</span>
         </div>
         <div class="badge">
             <img src="data:image/png;base64,{ocean_base64}" alt="globe"/>
@@ -500,16 +501,14 @@ with col_input:
     st.markdown('</div>', unsafe_allow_html=True)
 
 with col_mic:
-    st.markdown('<div class="input-flex-shrink"><div class="mic-button-wrapper">', unsafe_allow_html=True)
-    mic_clicked = st.button("🎤", key="mic_btn", help="Voice input (coming soon)")
-    st.markdown('</div></div>', unsafe_allow_html=True)
+    pass
 
 st.markdown('</div></div>', unsafe_allow_html=True)
 
 # Handle mic button click
-if mic_clicked:
-    st.session_state.messages.append({"role": "assistant", "content": trans["voice_button_info"]})
-    st.rerun()
+# if mic_clicked:
+#     st.session_state.messages.append({"role": "assistant", "content": trans["voice_button_info"]})
+#     st.rerun()
 
 # Process User Input
 if user_input:
@@ -520,7 +519,8 @@ if user_input:
 
     with chat_container:
         with st.chat_message("assistant"):
-            with st.spinner(trans["extracting"]):
+            # Single spinner for all backend processing
+            with st.spinner("Processing..."):  # can be "Processing your request..."
                 sql_query = SQLagent(user_input)
 
                 if sql_query and sql_query.get("result"):
@@ -550,11 +550,11 @@ if user_input:
                         with open(csv_path, "rb") as f:
                             csv_data = f.read()
 
-                        with st.spinner(trans["summarizing"]):
-                            summary, visualizations = summarizeTable(user_input, csv_path)
-                            figures = plotGraphs(csv_path, visualizations)
+                        # Summarize and plot inside the same spinner
+                        summary, visualizations = summarizeTable(user_input, csv_path)
+                        figures = plotGraphs(csv_path, visualizations)
 
-                        # Append assistant message with all content
+                        # Append assistant message
                         st.session_state.messages.append({
                             "role": "assistant",
                             "content": trans.get("assistant_content", "Data processed successfully"),
