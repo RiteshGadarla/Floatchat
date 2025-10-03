@@ -6,12 +6,7 @@ FloatChat is an **AI-powered conversational platform** that simplifies access to
 
 🚀 Designed under **Smart India Hackathon 2025**, FloatChat bridges the gap between **ocean science and usability** by transforming raw datasets into **decision-ready intelligence** for **policy makers, researchers, fisheries, and educators**.
 
----
-
-## 🎥 Project Demo & Resources
-
-* 📺 **Video Demo** [Youtube](https://youtu.be/qfIHBur1b4M)
-* 📑 **Project PPT:** [View Presentation](https://drive.google.com/file/d/18zu1PviOFb_JTFFWFLE5WXvSHGpU3Rdl/view?usp=drive_link)
+📺 **Video Demo** [Youtube](https://youtu.be/qfIHBur1b4M)
 
 ---
 
